@@ -8,12 +8,14 @@ let io;
 const initializeChatNamespace = (socketIO) => {
   io = socketIO;
   const chatNamespace = io.of('/chat');
+  console.log('💬 Initializing chat namespace at /chat');
 
   chatNamespace.use(async (socket, next) => {
     try {
       const token = socket.handshake.auth.token || socket.handshake.headers.authorization?.split(' ')[1];
       
       if (!token) {
+        console.log('❌ Chat namespace: No token provided');
         return next(new Error('Authentication required'));
       }
 
@@ -22,9 +24,10 @@ const initializeChatNamespace = (socketIO) => {
       socket.userEmail = decoded.email;
       socket.userRole = decoded.role;
       socket.user = { id: decoded.id, email: decoded.email, role: decoded.role };
+      console.log(`✅ Chat namespace: Authenticated user ${decoded.email}`);
       next();
     } catch (error) {
-      console.error('Chat namespace auth error:', error);
+      console.error('❌ Chat namespace auth error:', error.message);
       next(new Error('Invalid token'));
     }
   });

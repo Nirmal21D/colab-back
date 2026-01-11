@@ -73,27 +73,27 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
 }));
 
-// Security: Rate limiting for all routes
-const globalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.',
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+// Security: Rate limiting for all routes (DISABLED for development)
+// const globalLimiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 minutes
+//   max: 100, // Limit each IP to 100 requests per windowMs
+//   message: 'Too many requests from this IP, please try again later.',
+//   standardHeaders: true,
+//   legacyHeaders: false,
+// });
 
-// Security: Stricter rate limiting for authentication routes
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: config.env === 'production' ? 10 : 100, // More lenient in development
-  skipSuccessfulRequests: true, // Don't count successful requests
-  message: 'Too many login attempts, please try again after 15 minutes.',
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+// Security: Stricter rate limiting for authentication routes (DISABLED for development)
+// const authLimiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 minutes
+//   max: config.env === 'production' ? 10 : 100, // More lenient in development
+//   skipSuccessfulRequests: true, // Don't count successful requests
+//   message: 'Too many login attempts, please try again after 15 minutes.',
+//   standardHeaders: true,
+//   legacyHeaders: false,
+// });
 
-// Apply global rate limiter to all API routes
-app.use('/api/', globalLimiter);
+// Apply global rate limiter to all API routes (DISABLED)
+// app.use('/api/', globalLimiter);
 
 // Webhook routes BEFORE express.json() middleware
 // Razorpay webhooks need raw body for signature verification
@@ -106,7 +106,7 @@ app.use(morgan('dev'));
 
 // Routes
 app.use('/health', healthRoutes);
-app.use('/api/auth', authLimiter, authRoutes); // Apply stricter rate limiting to auth routes
+app.use('/api/auth', authRoutes); // Rate limiting disabled for development
 app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/reports', reportRoutes);

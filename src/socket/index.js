@@ -11,11 +11,10 @@ let io = null;
 const initializeSocket = (httpServer) => {
   io = new Server(httpServer, {
     cors: {
-      origin: config.cors.origin === '*' 
-        ? '*' 
-        : ['http://localhost:3000', 'http://localhost:5000'],
-      credentials: true,
-      methods: ['GET', 'POST']
+      origin: config.cors.origin,
+      credentials: config.cors.credentials,
+      methods: config.cors.methods,
+      allowedHeaders: config.cors.allowedHeaders
     },
     pingTimeout: 60000,
     pingInterval: 25000

@@ -85,9 +85,11 @@ const globalLimiter = rateLimit({
 // Security: Stricter rate limiting for authentication routes
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 login requests per windowMs
+  max: config.env === 'production' ? 10 : 100, // More lenient in development
   skipSuccessfulRequests: true, // Don't count successful requests
   message: 'Too many login attempts, please try again after 15 minutes.',
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 // Apply global rate limiter to all API routes

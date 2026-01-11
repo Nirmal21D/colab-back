@@ -29,6 +29,31 @@ const { notFound, errorHandler } = require('./middlewares/errorHandler');
 
 const app = express();
 
+// CORS MUST be FIRST to handle preflight OPTIONS requests
+app.use(cors(config.cors));
+
+// Additional CORS headers for maximum compatibility
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  const allowedOrigins = Array.isArray(config.cors.origin) ? config.cors.origin : [config.cors.origin];
+  
+  if (config.cors.origin === '*' || (origin && allowedOrigins.includes(origin))) {
+    res.setHeader('Access-Control-Allow-Origin', origin || '*');
+  }
+  
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept');
+  res.setHeader('Access-Control-Expose-Headers', 'Content-Range, X-Content-Range');
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+  
+  next();
+});
+
 // Security: Helmet middleware for security headers
 app.use(helmet({
   contentSecurityPolicy: {
@@ -73,7 +98,6 @@ app.use('/api/', globalLimiter);
 app.use('/api/webhooks', webhookRoutes);
 
 // Middleware
-app.use(cors(config.cors));
 app.use(express.json({ limit: '50mb' })); // Increase limit for large file uploads
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(morgan('dev'));

@@ -218,6 +218,7 @@ const initializeChatNamespace = (socketIO) => {
   });
 
   console.log('💬 Chat namespace initialized');
+  return chatNamespace;
 };
 
-module.exports = { initializeChatNamespace };
+module.exports = initializeChatNamespace;

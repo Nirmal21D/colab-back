@@ -11,13 +11,15 @@ let io = null;
 const initializeSocket = (httpServer) => {
   io = new Server(httpServer, {
     cors: {
-      origin: config.cors.origin,
-      credentials: config.cors.credentials,
-      methods: config.cors.methods,
-      allowedHeaders: config.cors.allowedHeaders
+      origin: true, // Allow all origins
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
     },
     pingTimeout: 60000,
-    pingInterval: 25000
+    pingInterval: 25000,
+    transports: ['websocket', 'polling'],
+    allowEIO3: true
   });
 
   // Authentication middleware
@@ -57,8 +59,7 @@ const initializeSocket = (httpServer) => {
   require('./boardNamespace')(io);
   
   // Initialize chat namespace
-  const { initializeChatNamespace } = require('./chatNamespace');
-  initializeChatNamespace(io);
+  require('./chatNamespace')(io);
 
   // Initialize notification namespace
   require('./notificationNamespace')(io);

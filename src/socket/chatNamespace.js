@@ -1,5 +1,7 @@
 const Message = require('../models/Message');
 const chatService = require('../services/chat.service');
+const jwt = require('jsonwebtoken');
+const config = require('../config/env');
 
 let io;
 
@@ -9,18 +11,21 @@ const initializeChatNamespace = (socketIO) => {
 
   chatNamespace.use(async (socket, next) => {
     try {
-      const userId = socket.handshake.auth.userId;
-      const userEmail = socket.handshake.auth.userEmail;
-
-      if (!userId || !userEmail) {
+      const token = socket.handshake.auth.token || socket.handshake.headers.authorization?.split(' ')[1];
+      
+      if (!token) {
         return next(new Error('Authentication required'));
       }
 
-      socket.userId = userId;
-      socket.userEmail = userEmail;
+      const decoded = jwt.verify(token, config.jwt.accessSecret);
+      socket.userId = decoded.id;
+      socket.userEmail = decoded.email;
+      socket.userRole = decoded.role;
+      socket.user = { id: decoded.id, email: decoded.email, role: decoded.role };
       next();
     } catch (error) {
-      next(new Error('Authentication failed'));
+      console.error('Chat namespace auth error:', error);
+      next(new Error('Invalid token'));
     }
   });
 
